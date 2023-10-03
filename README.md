@@ -1,25 +1,29 @@
-#  Real time Sentiment Analysis using Confluent, Amazon Kinesis Data Analytics and Amazon Comprehend
+#  Stream Processing using Confluent with AWS Glue Streaming
 
-  
-This repository accompanies the [Enhance Customer Experience Through Real-Time Sentiment Analysis with Confluent on AWS](https://aws.amazon.com/blogs/apn/enhance-customer-experience-through-real-time-sentiment-analysis-with-confluent-on-aws/) blog post. It contains **one** [AWS Cloudformation](https://aws.amazon.com/cloudformation/) template. 
+[AWS Glue Streaming]() uses [Glue Connections](https://docs.aws.amazon.com/glue/latest/dg/glue-connections.html) to connect to different sources and targets. One of these conections is Kafka. However, this connection does not support SASL/PLAIN, a common authentication mechanism used by vanilla Kafka and Confluent. This limitation means that Glue Streaming does not natively support Confluent out-of-the-box.
+
+An alternative solution would be using native Spark APIs to integrate AWS Glue Streaming with Confluent. This repository provides a simple demo and boilerplate code for Glue Streaming. It reads data from a Confluent Cloud topic and writes that data into another topic, with the only transformation being the removal of a specific column. This code serves as a foundation that you can build upon by adding your own custom transformations as needed.
+
+We use Terraform to deploy all the necessary resources. The script deploys the following:
 
 The template deploys:
-1. PyFlink stream processing job that runs as an [Amazon Kinesis Data Analytics](https://aws.amazon.com/kinesis/data-analytics/) application. The job consumes textual data (e.g twitter feeds) stored in a [Confluent Cloud](https://www.confluent.io/) topic (input.topic), invokes [Amazon Comprehend](https://aws.amazon.com/comprehend/) APIs ([DetectSentiment](https://docs.aws.amazon.com/comprehend/latest/APIReference/API_DetectSentiment.html)) in real time to detect sentiment and writes the output to Confluent Cloud again.
+1. Confluent Cloud environment
+2. Confluent Cloud Cluster
+3. Confluent Cloud source and target topics
+4. API Keys with read/write permissions on the source and target topics
+5. [Datagen Connector](https://docs.confluent.io/cloud/current/connectors/cc-datagen-source.html) to generate mock data for the demo
+6. Glue Steaming Python code
+7. S3 Bucket to upload the code 
 
 
 ```bash
-├── Artifacts                             <-- Directory that will hold solution Artifacts
+├── assets                                <-- Directory that will hold solution Artifacts
 │   ├── dashboard.ndjson                  <-- An export of a sample OpenSearch dashboard to visualise transaction data
-├── KafkaFlinkConnector                   <-- Directory contains Kafka connector for Flink.
-│   └── pom.xml                           <-- POM for Flink Fat Jar
-├── Producer                              <-- Directory contains sample twitter producer code.
-│   ├── requirement.txt                   <-- Dependencies file for sample producer
-│   └── twitter_producer.py               <-- Sample producer python code
-└── RealTimeSentiment                     <-- Directory contains Kinesis Data Analytics PyFlink application code 
+└── Terraform                             <-- Directory contains Kinesis Data Analytics PyFlink application code 
 │   ├── main.py                           <-- Kinesis Data Analytics PyFlink application code 
 │   ├── bin
-│   │   ├── requirements.txt              <-- Dependencies file for Kinesis Data Analytics PyFlink application code 
-├── Realtime_Sentiment_Analysis_CFN.yml   <-- CFN template for KDA Application
+│   │   ├── requirements.txt              <-- Dependencies file for Kinesis Data Analytics PyFlink application code
+
 └── README.md
 ```
 
