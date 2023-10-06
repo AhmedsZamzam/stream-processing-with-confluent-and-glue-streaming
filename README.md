@@ -67,11 +67,11 @@ terraform apply
 1. Go to [Confluent Cloud Topics UI](https://confluent.cloud/go/topics), then choose the newly created environment and cluster.
 2. Browse to *source-topic* and view raw messages
    
-   ![Source Message](https://github.com/AhmedsZamzam/stream-processing-with-confluent-and-glue-streaming/blob/main/assets/source.jpeg)
+   ![Source Message](https://github.com/AhmedsZamzam/stream-processing-with-confluent-and-glue-streaming/blob/main/assets/source.png)
    
 4. Navigate to *target-topic* and then view post-processed messages. Notice the output messages are missing one column which was dropped by the Glue Steaming job.
    
-   ![Output Message](https://github.com/AhmedsZamzam/stream-processing-with-confluent-and-glue-streaming/blob/main/assets/output.jpeg)
+   ![Output Message](https://github.com/AhmedsZamzam/stream-processing-with-confluent-and-glue-streaming/blob/main/assets/output.png)
    
 6. Play with the Glue streaming code to add any transformations needed.
 
