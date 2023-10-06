@@ -6,7 +6,8 @@ from awsglue.context import GlueContext
 from pyspark.sql import SparkSession
 from awsglue.job import Job
 from pyspark.sql.streaming import StreamingQuery
-from pyspark.sql.types import StringType, StructField, StructType
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DoubleType
+from pyspark.sql.functions import col, from_json, to_json
 
 ## @params: [JOB_NAME]
 
@@ -45,8 +46,36 @@ kafka_source_df = spark \
     .load()
 
 
+# Define the updated JSON schema with the correct data types
+json_schema = StructType([
+    StructField("ordertime", TimestampType(), True),
+    StructField("orderid", IntegerType(), True),
+    StructField("itemid", StringType(), True),
+    StructField("orderunits", DoubleType(), True),
+    StructField("address", StructType([
+        StructField("city", StringType(), True),
+        StructField("state", StringType(), True),
+        StructField("zipcode", IntegerType(), True)
+    ]), True)
+])
+
+
+# Parse the JSON data and create a DataFrame and Drop the "orderid"
+parsed_df = kafka_source_df.selectExpr("CAST(value AS STRING)").\
+    select(from_json(col("value"), json_schema).alias("data"))
+
+
+# Select specific columns from the "data" struct, excluding "itemid"
+parsed_df = parsed_df.select(
+    col("data.ordertime").cast("timestamp").alias("ordertime"),
+    col("data.orderid").cast("integer").alias("orderid"),
+    col("data.orderunits").cast("double").alias("orderunits"),
+    col("data.address").alias("address")
+)
+
+
 # Write the data back to Kafka
-query: StreamingQuery = kafka_source_df \
+query: StreamingQuery = parsed_df.selectExpr("to_json(struct(*)) AS value") \
     .writeStream \
     .format("kafka") \
     .outputMode("append") \
